@@ -17,6 +17,10 @@ public:
 	// Sets default values for this character's properties
 	APlayerCharacter();
 
+	// 충돌 이벤트 처리
+	UFUNCTION()
+	void OnOverlapBegin(class UPrimitiveComponent* OverlappedComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -45,6 +49,43 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, Meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<class UInputAction> LookAction;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, Meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<class UInputAction> GetAction;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, Meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<class UInputAction> RunAction;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, Meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<class UInputAction> ThrowAction;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, Meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<class UInputAction> AimingAction;
+
+
 	void Move(const FInputActionValue& Value);
 	void Look(const FInputActionValue& Value);
+	void Get(const FInputActionValue& Value);
+	void Throw(const FInputActionValue& Value);
+
+	void StartRunning();
+	void StopRunning();
+	void StartAiming();
+	void StopAiming();
+private:
+	// 플레이어가 현재 달리고 있는지 여부를 확인
+	bool bIsRunning;
+
+	// 기본 속도와 달리기 속도를 설정하는 변수
+	float DefaultWalkSpeed;
+	float RunSpeed;
+
+	bool bIsAiming;
+	float AimingSpeed;
+	UPROPERTY(EditAnywhere, Category = "Throw")
+	float ThrowSpeed;
+
+	UPROPERTY(EditAnywhere, Category = "Rock")
+	class ARock* Rock; // ARock 포인터로 선언
+
+
 };
