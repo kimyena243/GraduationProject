@@ -12,7 +12,7 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "Components/CapsuleComponent.h"
-
+#include "Animation/AnimInstance.h"
 
 // Sets default values
 APlayerCharacter::APlayerCharacter()
@@ -68,7 +68,14 @@ APlayerCharacter::APlayerCharacter()
 	{
 		AimingAction = AimingActionRef.Object;
 	}
+	static ConstructorHelpers::FObjectFinder<UInputAction> AttackActionRef(TEXT("/Script/EnhancedInput.InputAction'/Game/Input/IA_Attack.IA_Attack'"));
+	if (AttackActionRef.Object)
+	{
+		AttackAction = AttackActionRef.Object;
+	}
 
+	CurrentCombo = 0; // 시작 콤보는 0
+	bCanCombo = true; // 공격 가능 상태로 시작
 	bIsRunning = false;
 	bIsAiming = false;
 
@@ -94,12 +101,12 @@ void APlayerCharacter::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActo
 	{
 		// 주운 돌을 HeldRock 변수에 저장
 		Rock = _Rock;
-		_Rock->MeshComponent->SetSimulatePhysics(false);
-		
-		UE_LOG(LogTemp, Warning, TEXT("Rock picked up!"));
-
-		// 주운 돌을 화면에 표시하기 위해 위치 조정 (예시)
-		_Rock->SetActorLocation(GetActorLocation() + FVector(0, 0, 50)); // 예: 플레이어 머리 위로 위치 조정
+		// 돌을 플레이어 머리 위에 고정
+		Rock->SetActorLocation(GetActorLocation() + FVector(0, 0, 100)); // 머리 위 위치 조정
+		Rock->SetActorRotation(GetActorRotation()); // 플레이어와 같은 방향으로 회전
+		Rock->MeshComponent->SetSimulatePhysics(false); // 물리 시뮬레이션 비활성화
+		Rock->AttachToActor(this, FAttachmentTransformRules::KeepWorldTransform); // 플레이어에 고정
+		UE_LOG(LogTemp, Warning, TEXT("Rock picked up and fixed!"));
 	}
 	
 }
@@ -135,6 +142,70 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 	EnhancedInputComponent->BindAction(ThrowAction, ETriggerEvent::Triggered, this, &APlayerCharacter::Throw);
 	EnhancedInputComponent->BindAction(AimingAction, ETriggerEvent::Started, this, &APlayerCharacter::StartAiming);
 	EnhancedInputComponent->BindAction(AimingAction, ETriggerEvent::Completed, this, &APlayerCharacter::StopAiming);
+	EnhancedInputComponent->BindAction(AttackAction, ETriggerEvent::Triggered, this, &APlayerCharacter::Attack);
+}
+
+void APlayerCharacter::AnimCommand()
+{
+	//UAnimInstance* animInstace = GetMesh()->GetAnimInstance();
+	//animInstace->Montage_Play(animMontage);
+
+	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+
+	if (AnimInstance && AttackMontage)
+	{
+		if (AnimInstance->Montage_IsPlaying(AttackMontage))
+		{
+			// 현재 재생 중인 섹션 가져오기
+			FName CurrentSection = AnimInstance->Montage_GetCurrentSection();
+
+			// 다음 섹션으로 이동
+			if (CurrentSection == "Combo2")
+			{
+				AnimInstance->Montage_JumpToSection(FName("Section2"), AttackMontage);
+			}
+			else if (CurrentSection == "Combo3")
+			{
+				AnimInstance->Montage_JumpToSection(FName("Section3"), AttackMontage);
+			}
+			else if (CurrentSection == "Combo4")
+			{
+				// 마지막 섹션이므로 콤보를 초기화하거나 다른 처리를 할 수 있음
+				AnimInstance->Montage_Stop(0.2f, AttackMontage);
+			}
+		}
+		else
+		{
+			// 몽타주가 재생 중이 아니면 첫 번째 섹션부터 시작
+			AnimInstance->Montage_Play(AttackMontage);
+			AnimInstance->Montage_JumpToSection(FName("Combo1"), AttackMontage);
+		}
+	}
+}
+
+void APlayerCharacter::Attack(const FInputActionValue& Value)
+{
+	bool v = Value.Get<bool>();
+	AnimCommand();
+}
+
+void APlayerCharacter::OnMontageEnded(UAnimMontage* Montage, bool bInterrupted)
+{
+	// 콤보가 끝나면 콤보 초기화
+	if (Montage == AttackMontage)
+	{
+		CurrentCombo = 0;
+		bCanCombo = false;
+	}
+}
+void APlayerCharacter::EnableNextCombo()
+{
+	bCanCombo = true;  // 다음 콤보로 넘어갈 수 있는 상태로 전환
+}
+
+void APlayerCharacter::DisableNextCombo()
+{
+	bCanCombo = false;  // 콤보를 더 이상 이어갈 수 없는 상태로 전환
 }
 
 void APlayerCharacter::Move(const FInputActionValue& Value)
@@ -170,14 +241,16 @@ void APlayerCharacter::Throw(const FInputActionValue& Value)
 	UE_LOG(LogTemp, Warning, TEXT("Rock !"));
 	if (Rock)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("tessssRock !"));
 		// 돌을 던지는 로직
-		Rock->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
-		FVector ForwardVector = GetControlRotation().Vector();
-		FVector LaunchVelocity = ForwardVector * ThrowSpeed;
-		Rock->Throw(LaunchVelocity);
+		Rock->MeshComponent->SetSimulatePhysics(true); // 물리 시뮬레이션 활성화
 
+		// 던지는 방향 계산
+		FVector ThrowDirection = GetActorForwardVector(); // 플레이어가 보고 있는 방향
+		Rock->MeshComponent->AddImpulse(ThrowDirection * 1000.0f); // 힘을 가해 던짐
+
+		// 돌을 떨어뜨린 후 HeldRock을 nullptr로 설정
 		Rock = nullptr;
+		UE_LOG(LogTemp, Warning, TEXT("Rock thrown!"));
 	}
 	else
 	{

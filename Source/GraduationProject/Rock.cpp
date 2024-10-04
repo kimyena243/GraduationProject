@@ -3,19 +3,23 @@
 
 #include "Rock.h"
 #include "GameFramework/ProjectileMovementComponent.h"
+#include "Components/SphereComponent.h"
 // Sets default values
 ARock::ARock()
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
     PrimaryActorTick.bCanEverTick = true;
 
+    SphereComponent = CreateDefaultSubobject<USphereComponent>(TEXT("SphereComponent"));
+    RootComponent = SphereComponent;
+
     MeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("MeshComponent"));
-    RootComponent = MeshComponent;
+    MeshComponent->SetupAttachment(RootComponent);
 
-    // 물리적 이동 설정
-    ProjectileMovement = CreateDefaultSubobject<UProjectileMovementComponent>(TEXT("ProjectileMovement"));
-    ProjectileMovement->bRotationFollowsVelocity = true;
-
+    // 물리 시뮬레이션 초기 설정
+    MeshComponent->SetSimulatePhysics(true); // 레벨에 배치 시 물리 시뮬레이션 활성화
+    SphereComponent->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+    SphereComponent->SetCollisionResponseToAllChannels(ECR_Overlap);
     // 충돌 처리
     MeshComponent->OnComponentHit.AddDynamic(this, &ARock::OnHit);
 

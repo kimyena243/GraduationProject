@@ -61,7 +61,20 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, Meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<class UInputAction> AimingAction;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, Meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<class UInputAction> AttackAction;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Animation)
+	TObjectPtr<UAnimMontage> AttackMontage;
+
+	void AnimCommand();
+	void Attack(const FInputActionValue& Value);
+	int32 CurrentCombo;
+	bool bCanCombo;
+	UFUNCTION()
+	void OnMontageEnded(UAnimMontage* Montage, bool bInterrupted);
+	void EnableNextCombo();
+	void DisableNextCombo();
 	void Move(const FInputActionValue& Value);
 	void Look(const FInputActionValue& Value);
 	void Get(const FInputActionValue& Value);
