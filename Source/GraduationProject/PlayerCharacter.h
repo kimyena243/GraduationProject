@@ -5,6 +5,8 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "InputActionValue.h"
+#include "Weapon.h"
+#include "Components/SphereComponent.h"
 #include "PlayerCharacter.generated.h"
 
 
@@ -20,7 +22,8 @@ public:
 	// 충돌 이벤트 처리
 	UFUNCTION()
 	void OnOverlapBegin(class UPrimitiveComponent* OverlappedComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
-
+	UFUNCTION()
+	void OnOverlapEnd(class UPrimitiveComponent* OverlappedComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -71,10 +74,10 @@ protected:
 	void Attack(const FInputActionValue& Value);
 	int32 CurrentCombo;
 	bool bCanCombo;
-	UFUNCTION()
-	void OnMontageEnded(UAnimMontage* Montage, bool bInterrupted);
-	void EnableNextCombo();
-	void DisableNextCombo();
+	//UFUNCTION()
+	//void OnMontageEnded(UAnimMontage* Montage, bool bInterrupted);
+	//
+	FName GetNextComboSection();
 	void Move(const FInputActionValue& Value);
 	void Look(const FInputActionValue& Value);
 	void Get(const FInputActionValue& Value);
@@ -84,6 +87,9 @@ protected:
 	void StopRunning();
 	void StartAiming();
 	void StopAiming();
+
+	void EquipWeapon(AWeapon* Weapon);
+	void DropWeapon();
 private:
 	// 플레이어가 현재 달리고 있는지 여부를 확인
 	bool bIsRunning;
@@ -91,7 +97,7 @@ private:
 	// 기본 속도와 달리기 속도를 설정하는 변수
 	float DefaultWalkSpeed;
 	float RunSpeed;
-
+	bool bIsMove;
 	bool bIsAiming;
 	float AimingSpeed;
 	UPROPERTY(EditAnywhere, Category = "Throw")
@@ -101,4 +107,32 @@ private:
 	class ARock* Rock; // ARock 포인터로 선언
 
 
+protected:
+
+	// 현재 획득한 무기
+	AWeapon* EquippedWeapon;
+	AWeapon* CurrentWeapon;
+
+
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon")
+	TSubclassOf<AWeapon> WeaponClass;
+
+	// 충돌 감지를 위한 콜리전 컴포넌트
+	UPROPERTY(VisibleAnywhere)
+	USphereComponent* PickupRange;
+	bool bIsWeaponEquipped;
+
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Magic")
+	UStaticMeshComponent* MagicArea; // 마법 범위
+	UPROPERTY(EditAnywhere, Category = "Mesh")
+	UStaticMesh* MagicAreaMesh;
+	void SetMagicArea();
+
+public:
+	void EnableNextCombo();
+
+	UFUNCTION()
+	void OnPickupMontageEnded(UAnimMontage* Montage, bool bInterrupted);
 };
