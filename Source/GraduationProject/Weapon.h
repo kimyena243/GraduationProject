@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "Components/BoxComponent.h"
 #include "Weapon.generated.h"
 
 UCLASS()
@@ -14,11 +15,18 @@ class GRADUATIONPROJECT_API AWeapon : public AActor
 public:	
 	// Sets default values for this actor's properties
 	AWeapon();
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	USkeletalMeshComponent* WeaponMesh;
+	
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	UBoxComponent* BoxComponent;  // BoxComponent 변수 선언
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
+	UFUNCTION()
+	void OnComponentBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 
+	int Damage = 10;
 };

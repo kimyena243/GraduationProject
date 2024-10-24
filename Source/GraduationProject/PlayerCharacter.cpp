@@ -102,7 +102,7 @@ APlayerCharacter::APlayerCharacter()
 
 	// 콜리전 설정 (Capsule 컴포넌트에서 설정)
 	GetCapsuleComponent()->OnComponentBeginOverlap.AddDynamic(this, &APlayerCharacter::OnOverlapBegin);
-
+	GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_Pawn, ECR_Ignore);
 	// 콜리전 범위 설정
 	PickupRange = CreateDefaultSubobject<USphereComponent>(TEXT("PickupRange"));
 	PickupRange->SetupAttachment(RootComponent);
