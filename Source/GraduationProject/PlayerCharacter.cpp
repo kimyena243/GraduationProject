@@ -112,7 +112,7 @@ APlayerCharacter::APlayerCharacter()
 	// 범위 시각화 설정 (디버그 모드에서만 보임)
 	PickupRange->SetHiddenInGame(false);  // 게임 내에서 숨기지 않음
 	PickupRange->SetVisibility(true);     // 보이도록 설정
-
+	
 	// 무기 초기화
 	EquippedWeapon = nullptr;
 	CurrentWeapon = nullptr;
@@ -268,10 +268,32 @@ void APlayerCharacter::AnimCommand()
 
 void APlayerCharacter::Attack(const FInputActionValue& Value)
 {
+	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+
 	if (bIsWeaponEquipped)
 	{
-		bool v = Value.Get<bool>();
-		AnimCommand();
+
+		if (AStaff* Staff = Cast<AStaff>(EquippedWeapon))
+		{
+			if (Staff->bIsMagic)
+			{
+				bIsMove = false;
+				Staff->MagicAttack();
+
+				AnimInstance->Montage_Play(AttackMontage);
+				AnimInstance->Montage_JumpToSection(FName("Magic"), AttackMontage);
+				// 몽타주 종료 시 호출될 함수 바인딩
+				FOnMontageEnded MontageEndedDelegate;
+				MontageEndedDelegate.BindUObject(this, &APlayerCharacter::OnPickupMontageEnded);
+				AnimInstance->Montage_SetEndDelegate(MontageEndedDelegate, AttackMontage);
+
+			}
+		}
+		else
+		{
+			bool v = Value.Get<bool>();
+			AnimCommand();
+		}
 	}
 }
 //

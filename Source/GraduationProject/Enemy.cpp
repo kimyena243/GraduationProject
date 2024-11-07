@@ -72,6 +72,8 @@ void AEnemy::OnHit(float Damage)
         
         Die();
     }
+
+    UE_LOG(LogTemp, Log, TEXT("Health: %d"), Health);
 }
 
 void AEnemy::ResetHitState()

@@ -7,6 +7,7 @@
 #include "InputActionValue.h"
 #include "Weapon.h"
 #include "Components/SphereComponent.h"
+#include "Staff.h"
 #include "PlayerCharacter.generated.h"
 
 
@@ -122,7 +123,7 @@ protected:
 	UPROPERTY(VisibleAnywhere)
 	USphereComponent* PickupRange;
 	bool bIsWeaponEquipped;
-
+	
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Magic")
 	UStaticMeshComponent* MagicArea; // 마법 범위
