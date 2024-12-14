@@ -16,5 +16,11 @@ class GRADUATIONPROJECT_API AMyPlayerController : public APlayerController
 
 public:
 	virtual void BeginPlay() override;
+
+    // ¹Ì´Ï¸Ê À§Á¬ Å¬·¡½º
+    UPROPERTY(EditDefaultsOnly, Category = "UI")
+    TSubclassOf<UUserWidget> MiniMapWidgetClass;
+	UPROPERTY(EditDefaultsOnly, Category = "UI")
+	UTextureRenderTarget2D* RenderTarget;
 	
 };

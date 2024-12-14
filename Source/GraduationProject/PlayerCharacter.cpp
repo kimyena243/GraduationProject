@@ -289,11 +289,23 @@ void APlayerCharacter::Attack(const FInputActionValue& Value)
 
 			}
 		}
+	
+		else if (ABow* Bow = Cast<ABow>(EquippedWeapon))
+		{
+			
+				
+			Bow->FireArrow();
+
+			
+		}
 		else
 		{
 			bool v = Value.Get<bool>();
 			AnimCommand();
 		}
+	
+		
+		
 	}
 }
 //

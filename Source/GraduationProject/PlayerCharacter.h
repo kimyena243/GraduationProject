@@ -8,6 +8,7 @@
 #include "Weapon.h"
 #include "Components/SphereComponent.h"
 #include "Staff.h"
+#include "Bow.h"
 #include "PlayerCharacter.generated.h"
 
 
