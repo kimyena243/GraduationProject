@@ -87,7 +87,11 @@ APlayerCharacter::APlayerCharacter()
 	{
 		AttackAction = AttackActionRef.Object;
 	}
-
+	static ConstructorHelpers::FObjectFinder<UInputAction> MapActionRef(TEXT("/Script/EnhancedInput.InputAction'/Game/Input/IA_Attack.IA_Map'"));
+	if (MapActionRef.Object)
+	{
+		MapAction = MapActionRef.Object;
+	}
 	//CurrentCombo = 0; // 시작 콤보는 0
 	bCanCombo = true; // 공격 가능 상태로 시작
 	bIsRunning = false;
@@ -97,7 +101,7 @@ APlayerCharacter::APlayerCharacter()
 	DefaultWalkSpeed = 600.0f;
 	RunSpeed = 1200.0f;
 	AimingSpeed = 200.0f;
-	Rock = nullptr;
+	
 	ThrowSpeed = 1000.0f;
 
 	// 콜리전 설정 (Capsule 컴포넌트에서 설정)
@@ -159,6 +163,10 @@ void APlayerCharacter::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActo
 		UE_LOG(LogTemp, Warning, TEXT("Weapon in range!"));
 		UE_LOG(LogTemp, Warning, TEXT("Equipped weapon: %s"), *CurrentWeapon->GetName());
 	}
+	if (OtherActor && OtherActor->ActorHasTag(TEXT("Key")))
+	{
+		Key = OtherActor;
+	}
 }
 
 void APlayerCharacter::OnOverlapEnd(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
@@ -215,6 +223,7 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 	EnhancedInputComponent->BindAction(AimingAction, ETriggerEvent::Started, this, &APlayerCharacter::StartAiming);
 	EnhancedInputComponent->BindAction(AimingAction, ETriggerEvent::Completed, this, &APlayerCharacter::StopAiming);
 	EnhancedInputComponent->BindAction(AttackAction, ETriggerEvent::Triggered, this, &APlayerCharacter::Attack);
+	EnhancedInputComponent->BindAction(MapAction, ETriggerEvent::Triggered, this, &APlayerCharacter::ToggleMinimap);
 }
 
 void APlayerCharacter::AnimCommand()
@@ -344,6 +353,11 @@ void APlayerCharacter::OnPickupMontageEnded(UAnimMontage* Montage, bool bInterru
 	bIsMove = true; // bIsMove를 true로 설정
 }
 
+void APlayerCharacter::ToggleMinimap()
+{
+	
+}
+
 FName APlayerCharacter::GetNextComboSection()
 {
 	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
@@ -468,13 +482,21 @@ void APlayerCharacter::Get(const FInputActionValue& Value)
 		EquipWeapon(CurrentWeapon);  // 범위 내의 무기를 장착
 		UE_LOG(LogTemp, Warning, TEXT("Weapon equipped!"));
 	}
-	//else
-	//{
-	//	if (bIsWeaponEquipped)
-	//	{
-	//		DropWeapon();  // 손에 든 무기를 내려놓기
-	//	}
-	//}
+	if (Key)  // 범위 내에 무기가 있고, 무기를 장착하고 있지 않은 경우
+	{
+		bIsMove = false;
+		AnimInstance->Montage_Play(AttackMontage);
+		AnimInstance->Montage_JumpToSection(FName("PickUp"), AttackMontage);
+		// 몽타주 종료 시 호출될 함수 바인딩
+		FOnMontageEnded MontageEndedDelegate;
+		MontageEndedDelegate.BindUObject(this, &APlayerCharacter::OnPickupMontageEnded);
+		AnimInstance->Montage_SetEndDelegate(MontageEndedDelegate, AttackMontage);
+
+		
+		Key->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetIncludingScale, TEXT("KeySocket"));
+		//Key->SetActorRelativeScale3D(FVector(0.1f, 0.1f, 0.1f));
+		Key->SetOwner(this);
+	}
 
 }
 void APlayerCharacter::DropWeapon()
@@ -526,24 +548,7 @@ void APlayerCharacter::EquipWeapon(AWeapon* Weapon)
 }
 void APlayerCharacter::Throw(const FInputActionValue& Value)
 {
-	UE_LOG(LogTemp, Warning, TEXT("Rock !"));
-	if (Rock)
-	{
-		// 돌을 던지는 로직
-		Rock->MeshComponent->SetSimulatePhysics(true); // 물리 시뮬레이션 활성화
 
-		// 던지는 방향 계산
-		FVector ThrowDirection = GetActorForwardVector(); // 플레이어가 보고 있는 방향
-		Rock->MeshComponent->AddImpulse(ThrowDirection * 1000.0f); // 힘을 가해 던짐
-
-		// 돌을 떨어뜨린 후 HeldRock을 nullptr로 설정
-		Rock = nullptr;
-		UE_LOG(LogTemp, Warning, TEXT("Rock thrown!"));
-	}
-	else
-	{
-		UE_LOG(LogTemp, Warning, TEXT("nooooo Rock"));
-	}
 }
 
 void APlayerCharacter::StartRunning()

@@ -5,7 +5,7 @@
 
 AMyGameModeBase::AMyGameModeBase()
 {
-
+	bUseSeamlessTravel = true;
 	static ConstructorHelpers::FClassFinder<APawn> DefaultPawnClassRef(TEXT("/Game/Blueprint/BP_PlayerCharacter.BP_PlayerCharacter_C"));
 	if (DefaultPawnClassRef.Class)
 	{

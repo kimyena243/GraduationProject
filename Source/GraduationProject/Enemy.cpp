@@ -7,6 +7,8 @@
 #include "Animation/AnimInstance.h"
 #include "Components/CapsuleComponent.h"
 #include "AIController.h"
+#include "Kismet/GameplayStatics.h"
+#include "LevelManager.h"
 #include "TimerManager.h"
 // Sets default values
 AEnemy::AEnemy()
@@ -121,6 +123,12 @@ void AEnemy::Die()
 }
 void AEnemy::OnDeathFinished()
 {
+    ALevelManager* LevelManager = Cast<ALevelManager>(UGameplayStatics::GetActorOfClass(GetWorld(), ALevelManager::StaticClass()));
+    if (LevelManager)
+    {
+        LevelManager->OnEnemyDefeated(this);
+    }
+
     // 적 캐릭터를 월드에서 제거
     Destroy();
 }

@@ -68,6 +68,8 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, Meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<class UInputAction> AttackAction;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, Meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<class UInputAction> MapAction;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Animation)
 	TObjectPtr<UAnimMontage> AttackMontage;
@@ -115,7 +117,7 @@ protected:
 	AWeapon* EquippedWeapon;
 	AWeapon* CurrentWeapon;
 
-
+	AActor* Key;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon")
 	TSubclassOf<AWeapon> WeaponClass;
@@ -137,4 +139,8 @@ public:
 
 	UFUNCTION()
 	void OnPickupMontageEnded(UAnimMontage* Montage, bool bInterrupted);
+
+
+
+	void ToggleMinimap();
 };

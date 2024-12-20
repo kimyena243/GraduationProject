@@ -2,6 +2,7 @@
 
 #pragma once
 
+
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "MapManager.generated.h"
@@ -42,8 +43,14 @@ public:
 
 	// Player icon material instance
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "MiniMap")
-	class UMaterialInstance* PlayerIconMaterial;
+	class UImage* PlayerIcon;
 
 	// Update player icon position on the minimap
 	void UpdatePlayerIconPosition();
+
+	FVector2D WorldToMinimapPosition(const FVector& WorldLocation);
+
+	UPROPERTY(EditAnywhere)
+	float MinimapZoom = 1000.0f; // 미니맵 확대 크기
+	
 };

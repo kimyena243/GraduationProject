@@ -2,8 +2,11 @@
 
 
 #include "MyPlayerController.h"
+#include "Kismet/GameplayStatics.h"
 #include "Blueprint/UserWidget.h"
 #include "MiniMapWidget.h"
+#include "MapManager.h"
+
 void AMyPlayerController::BeginPlay()
 {
 
@@ -11,19 +14,24 @@ void AMyPlayerController::BeginPlay()
 
 	FInputModeGameOnly GameInputMode;
 	SetInputMode(GameInputMode);
+    // 맵 매니저 가져오기
+    MapManagerInstance = Cast<AMapManager>(UGameplayStatics::GetActorOfClass(GetWorld(), AMapManager::StaticClass()));
+
 
     if (MiniMapWidgetClass)
     {
         // 위젯 생성
-        UMiniMapWidget* MiniMapWidget = CreateWidget<UMiniMapWidget>(this, MiniMapWidgetClass);
+        MiniMapWidgetInstance = CreateWidget<UMiniMapWidget>(this, MiniMapWidgetClass);
 
-        if (MiniMapWidget)
+        if (MiniMapWidgetInstance)
         {
             // 렌더 타겟 설정
-            MiniMapWidget->MiniMapRenderTarget = RenderTarget;
+            MiniMapWidgetInstance->MiniMapRenderTarget = RenderTarget;
+            MiniMapWidgetInstance->MapManager = MapManagerInstance;
 
             // 화면에 추가
-            MiniMapWidget->AddToViewport();
+            MiniMapWidgetInstance->AddToViewport();
         }
+      
     }
 }

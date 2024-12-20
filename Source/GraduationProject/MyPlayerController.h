@@ -1,5 +1,3 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #pragma once
 
 #include "CoreMinimal.h"
@@ -9,17 +7,28 @@
 /**
  * 
  */
+class UMiniMapWidget;
+class AMapManager;
+
 UCLASS()
 class GRADUATIONPROJECT_API AMyPlayerController : public APlayerController
 {
 	GENERATED_BODY()
 
 public:
+	
 	virtual void BeginPlay() override;
 
-    // ¹Ì´Ï¸Ê À§Á¬ Å¬·¡½º
+	UPROPERTY(BlueprintReadWrite, Category = "UI")
+	UMiniMapWidget* MiniMapWidgetInstance;
+	// ¸Ê ¸Å´ÏÀú ÂüÁ¶
+	UPROPERTY(BlueprintReadWrite, Category = "World")
+	AMapManager* MapManagerInstance;
+
+	// ¹Ì´Ï¸Ê À§Á¬ Å¬·¡½º
     UPROPERTY(EditDefaultsOnly, Category = "UI")
     TSubclassOf<UUserWidget> MiniMapWidgetClass;
+
 	UPROPERTY(EditDefaultsOnly, Category = "UI")
 	UTextureRenderTarget2D* RenderTarget;
 	
