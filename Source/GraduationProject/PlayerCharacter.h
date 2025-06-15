@@ -9,6 +9,9 @@
 #include "Components/SphereComponent.h"
 #include "Staff.h"
 #include "Bow.h"
+#include"Lantern.h"
+#include "Components/ChildActorComponent.h"
+
 #include "PlayerCharacter.generated.h"
 
 
@@ -69,8 +72,9 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, Meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<class UInputAction> AttackAction;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, Meta = (AllowPrivateAccess = "true"))
-	TObjectPtr<class UInputAction> MapAction;
+	TObjectPtr<class UInputAction> ToggleLanternAction;
 
+	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Animation)
 	TObjectPtr<UAnimMontage> AttackMontage;
 
@@ -86,7 +90,7 @@ protected:
 	void Look(const FInputActionValue& Value);
 	void Get(const FInputActionValue& Value);
 	void Throw(const FInputActionValue& Value);
-
+	void ToggleLantern(const FInputActionValue& Value);
 	void StartRunning();
 	void StopRunning();
 	void StartAiming();
@@ -133,14 +137,16 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "Mesh")
 	UStaticMesh* MagicAreaMesh;
 	void SetMagicArea();
-
+	
 public:
 	void EnableNextCombo();
 
 	UFUNCTION()
 	void OnPickupMontageEnded(UAnimMontage* Montage, bool bInterrupted);
 
-
-
-	void ToggleMinimap();
+	
+	UPROPERTY(VisibleAnywhere)
+	UChildActorComponent* LanternComponent;
+	UPROPERTY(BlueprintReadOnly)
+	class ALantern* Lantern;
 };

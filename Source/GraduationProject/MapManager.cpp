@@ -10,8 +10,12 @@
 #include "GameFramework/PlayerController.h"
 #include "Components/Image.h"
 #include "GameFramework/Pawn.h"
-#include "MyPlayerController.h"
-
+#include "MyPlayerController.h" 
+#include "Engine/Canvas.h"                   
+#include "Engine/CanvasRenderTarget2D.h"     
+#include "Components/Image.h"                 
+#include "Kismet/KismetRenderingLibrary.h"    
+#include "Materials/MaterialInstanceDynamic.h"
 
 AMapManager::AMapManager()
 {
@@ -40,25 +44,28 @@ void AMapManager::BeginPlay()
     if (UTextureRenderTarget2D* RenderTarget = Cast<UTextureRenderTarget2D>(SceneCapture->TextureTarget))
     {
         SceneCapture->TextureTarget = RenderTarget;
+    
+  
     }
- 
+
+   
 }
 
 void AMapManager::Tick(float DeltaTime)
 {
     Super::Tick(DeltaTime);
 
-    APawn* PlayerPawn = UGameplayStatics::GetPlayerPawn(GetWorld(), 0);
-    if (PlayerPawn && SceneCapture)
-    {
-        FVector PlayerLocation = PlayerPawn->GetActorLocation();
+    //APawn* PlayerPawn = UGameplayStatics::GetPlayerPawn(GetWorld(), 0);
+    //if (PlayerPawn && SceneCapture)
+    //{
+    //    FVector PlayerLocation = PlayerPawn->GetActorLocation();
 
-        // SceneCapture가 플레이어를 따라 움직임
-        FVector SceneCaptureLocation = FVector(PlayerLocation.X, PlayerLocation.Y, SceneCapture->GetComponentLocation().Z);
-        SceneCapture->SetWorldLocation(SceneCaptureLocation);
+    //     SceneCapture가 플레이어를 따라 움직임
+    //    FVector SceneCaptureLocation = FVector(PlayerLocation.X, PlayerLocation.Y, SceneCapture->GetComponentLocation().Z);
+    //    SceneCapture->SetWorldLocation(SceneCaptureLocation);
 
-       
-    }
+    //   
+    //}
     //UpdatePlayerIconPosition();
 }
 
@@ -78,6 +85,8 @@ void AMapManager::UpdatePlayerIconPosition()
         // Example: Adjust icon material position here
     }
 }
+
+
 
 FVector2D AMapManager::WorldToMinimapPosition(const FVector& PlayerLocation)
 {
@@ -114,6 +123,15 @@ FVector2D AMapManager::WorldToMinimapPosition(const FVector& PlayerLocation)
  
     return MinimapPosition;
 }
+
+void AMapManager::UpdateRenderTarget()
+{
+    
+}
+
+
+
+
 
 
 

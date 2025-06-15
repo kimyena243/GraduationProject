@@ -7,6 +7,9 @@
 #include "Kismet/GameplayStatics.h"
 #include "MapManager.h"
 #include "Engine/TextureRenderTarget2D.h"
+#include "Engine/CanvasRenderTarget2D.h"
+#include "CanvasTypes.h" 
+#include "Engine/Canvas.h"
 
 void UMiniMapWidget::UpdatePlayerIconPosition(FVector2D MinimapPosition)
 {
@@ -46,6 +49,8 @@ void UMiniMapWidget::NativeTick(const FGeometry& MyGeometry, float DeltaTime)
 
     if (MapManager)
     {
+      
+
         APawn* PlayerPawn = UGameplayStatics::GetPlayerPawn(GetWorld(), 0);
         if (PlayerPawn)
         {
@@ -55,5 +60,8 @@ void UMiniMapWidget::NativeTick(const FGeometry& MyGeometry, float DeltaTime)
 
             UpdatePlayerIconPosition(MinimapPosition);
         }
+   
     }
 }
+
+

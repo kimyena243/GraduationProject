@@ -87,10 +87,10 @@ APlayerCharacter::APlayerCharacter()
 	{
 		AttackAction = AttackActionRef.Object;
 	}
-	static ConstructorHelpers::FObjectFinder<UInputAction> MapActionRef(TEXT("/Script/EnhancedInput.InputAction'/Game/Input/IA_Attack.IA_Map'"));
-	if (MapActionRef.Object)
+	static ConstructorHelpers::FObjectFinder<UInputAction> ToggleLanternActionRef(TEXT("/Script/EnhancedInput.InputAction'/Game/Input/IA_ToggleLantern.IA_ToggleLantern'"));
+	if (ToggleLanternActionRef.Object)
 	{
-		MapAction = MapActionRef.Object;
+		ToggleLanternAction = ToggleLanternActionRef.Object;
 	}
 	//CurrentCombo = 0; // 시작 콤보는 0
 	bCanCombo = true; // 공격 가능 상태로 시작
@@ -133,6 +133,18 @@ APlayerCharacter::APlayerCharacter()
 		MagicArea->SetStaticMesh(MeshAsset.Object);
 		MagicArea->SetWorldScale3D(FVector(1.0f)); // 크기 조정
 		UE_LOG(LogTemp, Warning, TEXT("Mesh loaded successfully."));
+	}
+
+	LanternComponent = CreateDefaultSubobject<UChildActorComponent>(TEXT("LanternComponent"));
+	LanternComponent->SetupAttachment(GetMesh()); 
+
+	//랜턴
+	static ConstructorHelpers::FClassFinder<AActor> LanternBP(TEXT("/Game/Blueprint/BP_Lantern.BP_Lantern_C")); 
+	if (LanternBP.Succeeded())
+	{
+		LanternComponent->SetChildActorClass(LanternBP.Class);
+
+		UE_LOG(LogTemp, Warning, TEXT("lantern loaded successfully."));
 	}
 }
 
@@ -202,7 +214,10 @@ void APlayerCharacter::BeginPlay()
 		UE_LOG(LogTemp, Warning, TEXT("Mesh loaded from variable."));
 	}
 
-
+	if (LanternComponent)
+	{
+		Lantern = Cast<ALantern>(LanternComponent->GetChildActor());
+	}
 }
 
 // Called to bind functionality to input
@@ -223,7 +238,7 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 	EnhancedInputComponent->BindAction(AimingAction, ETriggerEvent::Started, this, &APlayerCharacter::StartAiming);
 	EnhancedInputComponent->BindAction(AimingAction, ETriggerEvent::Completed, this, &APlayerCharacter::StopAiming);
 	EnhancedInputComponent->BindAction(AttackAction, ETriggerEvent::Triggered, this, &APlayerCharacter::Attack);
-	EnhancedInputComponent->BindAction(MapAction, ETriggerEvent::Triggered, this, &APlayerCharacter::ToggleMinimap);
+	EnhancedInputComponent->BindAction(ToggleLanternAction, ETriggerEvent::Started, this, &APlayerCharacter::ToggleLantern);
 }
 
 void APlayerCharacter::AnimCommand()
@@ -342,6 +357,14 @@ void APlayerCharacter::SetMagicArea()
 		MagicArea->SetVisibility(true); // 범위 보이게 설정
 	}
 }
+void APlayerCharacter::ToggleLantern(const FInputActionValue& Value)
+{
+	UE_LOG(LogTemp, Warning, TEXT("F"));
+	if (Lantern)
+	{
+		Lantern->ToggleLight();
+	}
+}
 void APlayerCharacter::EnableNextCombo()
 {
 	UE_LOG(LogTemp, Warning, TEXT("next "));
@@ -353,10 +376,7 @@ void APlayerCharacter::OnPickupMontageEnded(UAnimMontage* Montage, bool bInterru
 	bIsMove = true; // bIsMove를 true로 설정
 }
 
-void APlayerCharacter::ToggleMinimap()
-{
-	
-}
+
 
 FName APlayerCharacter::GetNextComboSection()
 {

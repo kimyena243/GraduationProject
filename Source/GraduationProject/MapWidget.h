@@ -6,34 +6,67 @@
 #include "MapWidget.generated.h"
 
 
-class UImage;
-class UCanvasPanel;
-
-
 UCLASS()
 class GRADUATIONPROJECT_API UMapWidget : public UUserWidget
 {
 	GENERATED_BODY()
 	
+
 public:
+    virtual void NativeConstruct() override;
+    virtual void NativeTick(const FGeometry& MyGeometry, float InDeltaTime) override;
 
-    // 미니맵 UI 업데이트
-    void UpdateMinimapActors();
+    UFUNCTION()
+    void DrawAtLocation();
 
-    // 월드 좌표를 미니맵 좌표로 변환
-    FVector2D WorldToMinimapCoordinates(FVector WorldLocation);
+    UFUNCTION()
+    void OnFloorButtonClicked(int32 FloorIndex);
 
-    // 액터의 위치를 미니맵에 표시
-    void DrawActorOnMinimap(FVector2D MinimapPosition, FLinearColor Color);
-
-protected:
-    // UI 요소들
+    // 미니맵 이미지
     UPROPERTY(meta = (BindWidget))
-    UImage* MinimapImage; // 미니맵 이미지
+    class UImage* MinimapImage;
 
-    UPROPERTY(meta = (BindWidget))
-    UCanvasPanel* MinimapCanvas; // 미니맵을 그릴 캔버스
+    // 층별 RenderTarget 배열 (디자이너가 설정)
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Minimap")
+    TArray<UTextureRenderTarget2D*> FloorRenderTargets;
 
-    // 액터들의 위치를 실시간으로 갱신하기 위해 Tick 함수 호출
-    virtual void NativeTick(const FGeometry& MyGeometry, float DeltaTime);
+    // 현재 사용 중인 RenderTarget (FloorRenderTargets에서 선택됨)
+    UPROPERTY()
+    UTextureRenderTarget2D* CurrentRenderTarget;
+
+    //// 버튼들 (위젯 바인딩 필요)
+    //UPROPERTY(meta = (BindWidget))
+    //class UButton* Floor1Button;
+    //UPROPERTY(meta = (BindWidget))
+    //class UButton* Floor2Button;
+    //UPROPERTY(meta = (BindWidget))
+    //class UButton* Floor3Button;
+
+    UFUNCTION()
+    void OnFloor1Clicked();
+
+    UFUNCTION()
+    void OnFloor2Clicked();
+
+    UFUNCTION()
+    void OnFloor3Clicked();
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Minimap")
+    UMaterialInterface* BrushMaterial;
+
+ 
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Minimap")
+  
+    UMaterialInstanceDynamic* BrushRef;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Minimap")
+    float MapSizeX = 3500.f;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Minimap")
+    float MapSizeY = 3500.f;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Minimap")
+    float RevealSize = 200.f;
+
+    class APlayerCharacter* Player;
 };

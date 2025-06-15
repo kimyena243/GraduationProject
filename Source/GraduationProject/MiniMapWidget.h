@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
+#include "Lantern.h"
 #include "MiniMapWidget.generated.h"
 
 
@@ -30,8 +31,11 @@ public:
 
     virtual void NativeTick(const FGeometry& MyGeometry, float DeltaTime);
     
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Lantern")
+    ALantern* Lantern;
 
     // MiniMapWidget.h
     UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Minimap")
     AMapManager* MapManager;
+
 };
